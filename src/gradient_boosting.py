@@ -1,8 +1,9 @@
 import numpy as np
 from .decision_tree import DecisionTree
+from .utils import calculate_rmse
 
 class GradientBoosting:
-    def __init__(self, n_estimators=100, learning_rate=0.1, max_depth=3, min_samples_split=2, reg_lambda=1.0, reg_alpha=0.0, colsample=1.0, verbose=False, **kwargs):
+    def __init__(self, n_estimators=100, learning_rate=0.1, max_depth=3, early_stopping_rounds=5, min_samples_split=2, reg_lambda=1.0, reg_alpha=0.0, colsample=1.0, verbose=False, **kwargs):
         
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
@@ -12,10 +13,14 @@ class GradientBoosting:
         self.reg_alpha = reg_alpha
         self.colsample = colsample
         self.verbose = verbose
+        self.early_stopping_rounds = early_stopping_rounds
+        self.best_iteration = 0
         self.trees = []
         self.initial_prediction = None
 
     def fit(self, X, y):
+        best_score = float("inf")
+        no_improve_count = 0
         # Initialize predictions with the mean of the target values
         self.initial_prediction = np.mean(y)
         predictions = np.full(y.shape, self.initial_prediction)
@@ -43,6 +48,19 @@ class GradientBoosting:
             # Store the tree and its sampled features
             self.trees.append((tree, feature_indices))
 
+            current_score = calculate_rmse(y, predictions)
+            if current_score < best_score:
+                best_score = current_score
+                self.best_iteration = i
+                no_improve_count = 0
+            else:
+                no_improve_count += 1
+                
+            # Check for early stopping
+            if no_improve_count >= self.early_stopping_rounds:
+                print(f"Early stopping at iteration {i}")
+                break
+            
     def predict(self, X):
         # Start predictions with the initial value
         predictions = np.full(X.shape[0], self.initial_prediction)

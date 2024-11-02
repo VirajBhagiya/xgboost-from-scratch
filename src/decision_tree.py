@@ -44,13 +44,20 @@ class DecisionTree:
         n_samples, n_features = X.shape
 
         for feature_index in range(n_features):
-            thresholds = np.unique(X[:, feature_index])
-            for threshold in thresholds:
-                left_mask = X[:, feature_index] <= threshold
-                right_mask = X[:, feature_index] > threshold
+        # Sort by feature and get midpoints as candidate thresholds
+            sorted_indices = X[:, feature_index].argsort()
+            X_sorted, y_sorted = X[sorted_indices, feature_index], y[sorted_indices]
+            
+            for i in range(1, len(X_sorted)):
+                # Check midpoints between adjacent sorted values
+                if X_sorted[i] == X_sorted[i - 1]:
+                    continue
+                threshold = (X_sorted[i] + X_sorted[i - 1]) / 2
 
-                if (np.sum(left_mask) < self.min_samples_leaf or 
-                    np.sum(right_mask) < self.min_samples_leaf):
+                left_mask = X[:, feature_index] <= threshold
+                right_mask = ~left_mask
+
+                if np.sum(left_mask) < self.min_samples_leaf or np.sum(right_mask) < self.min_samples_leaf:
                     continue
 
                 y_left, y_right = y[left_mask], y[right_mask]

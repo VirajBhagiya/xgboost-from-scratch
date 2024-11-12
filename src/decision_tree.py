@@ -17,8 +17,7 @@ class DecisionTree:
         n_samples, n_features = X.shape
         
         # Terminate if max depth reached, or samples are insufficient for a split
-        if (depth >= self.max_depth or n_samples < self.min_samples_split 
-                or len(np.unique(y)) == 1):
+        if (depth >= self.max_depth or n_samples < self.min_samples_split or len(np.unique(y)) == 1):
             return {"leaf": True, "value": self._calculate_leaf_value(y)}
         
         # Find the best split

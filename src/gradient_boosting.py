@@ -14,7 +14,7 @@ class GradientBoosting:
         self.colsample = colsample
         self.verbose = verbose
         self.early_stopping_rounds = early_stopping_rounds
-        self.best_iteration = n_estimators  # Start assuming all trees are needed
+        self.best_iteration = n_estimators
         self.trees = []
         self.initial_prediction = None
 
